@@ -1,31 +1,42 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import fetch from 'node-fetch'; // Asegúrese de tenerlo o use import dinámico
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Se inicializa con la variable que ya configuramos en Render
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 app.post('/chat', async (req, res) => {
   try {
     const { message, personality } = req.body;
-    // Usamos el modelo sin prefijos de versión para que la librería elija la mejor ruta estable
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    const prompt = `Actúa como Jarvis. Personalidad: ${personality}. Mensaje: ${message}`;
-    const result = await model.generateContent(prompt);
+    // Llamada directa a la API de Google sin usar la librería problemática
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: json.stringify({
+        contents: [{ parts: [{ text: `Actúa como ${personality}. Responde breve: ${message}` }] }]
+      })
+    });
+
+    const data = await response.json();
     
-    res.json({ reply: result.response.text() });
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    const reply = data.candidates[0].content.parts[0].text;
+    res.json({ reply });
+
   } catch (error) {
-    console.error("Fallo en la matriz:", error);
-    res.status(500).json({ reply: "Error de enlace neuronal." });
+    console.error("Fallo total:", error.message);
+    res.status(500).json({ reply: "Error de conexión directa." });
   }
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Jarvis activo en puerto ${PORT}`));
+app.listen(10000, '0.0.0.0', () => console.log("🚀 Sistema REST Activo"));
