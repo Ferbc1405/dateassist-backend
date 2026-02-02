@@ -18,7 +18,7 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ reply: "API Key no configurada." });
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${apiKey}`;
 
     const response = await axios.post(url, {
       contents: [
@@ -34,13 +34,13 @@ app.post('/chat', async (req, res) => {
 
     const reply =
       response.data?.candidates?.[0]?.content?.parts?.[0]?.text
-      || "No se obtuvo respuesta.";
+      || "Sin respuesta del modelo.";
 
     res.json({ reply });
 
   } catch (error) {
     console.error("❌ Error Gemini:", error.response?.data || error.message);
-    res.status(500).json({ reply: "Error temporal del asistente." });
+    res.status(500).json({ reply: "Asistente no disponible temporalmente." });
   }
 });
 
