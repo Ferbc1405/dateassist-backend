@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import fetch from 'node-fetch'; // Asegúrese de tenerlo o use import dinámico
+import axios from 'axios';
 
 dotenv.config();
 const app = express();
@@ -13,30 +13,29 @@ app.post('/chat', async (req, res) => {
     const { message, personality } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // Llamada directa a la API de Google sin usar la librería problemática
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: json.stringify({
-        contents: [{ parts: [{ text: `Actúa como ${personality}. Responde breve: ${message}` }] }]
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(data.error.message);
+    if (!apiKey) {
+      throw new Error("API Key no configurada en Render");
     }
 
-    const reply = data.candidates[0].content.parts[0].text;
+    // Petición directa vía Axios para evitar el error 500 de compatibilidad
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        contents: [{ parts: [{ text: `Actúa como ${personality}. Responde breve: ${message}` }] }]
+      }
+    );
+
+    const reply = response.data.candidates[0].content.parts[0].text;
     res.json({ reply });
 
   } catch (error) {
-    console.error("Fallo total:", error.message);
-    res.status(500).json({ reply: "Error de conexión directa." });
+    console.error("Error Interno:", error.response?.data || error.message);
+    res.status(500).json({ 
+      reply: "Error de enlace táctico.",
+      error: error.message 
+    });
   }
 });
 
-app.listen(10000, '0.0.0.0', () => console.log("🚀 Sistema REST Activo"));
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Jarvis operativo en puerto ${PORT}`));
