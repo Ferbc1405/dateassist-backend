@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// CONFIGURACIÓN DE GEMINI - Sin rastros de OpenAI
+// Configuración exclusiva de Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/chat', async (req, res) => {
@@ -16,7 +16,7 @@ app.post('/chat', async (req, res) => {
     const { message, personality } = req.body;
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const prompt = `Actúa como ${personality}. Responde de forma breve: ${message}`;
+    const prompt = `Actúa como ${personality || 'asistente'}. Responde de forma breve y útil: ${message}`;
     const result = await model.generateContent(prompt);
     
     res.json({ reply: result.response.text() });
@@ -27,4 +27,4 @@ app.post('/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Jarvis activo en puerto ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Servidor listo en puerto ${PORT}`));
