@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) =>
-  res.send('🚀 Jarvis Online - Enlace Estable v3')
+  res.send('🚀 Jarvis Online – AI Studio Ready')
 );
 
 app.post('/chat', async (req, res) => {
@@ -17,15 +17,16 @@ app.post('/chat', async (req, res) => {
     const { message, personality } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // ✅ MODELO REALMENTE SOPORTADO POR LA API REST
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+    // ✅ API Y MODELO CORRECTOS (AI STUDIO)
+    const url = `https://api.generativeai.google/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
     const response = await axios.post(url, {
       contents: [
         {
+          role: 'user',
           parts: [
             {
-              text: `Actúa como un asistente con personalidad ${personality}. Responde de forma breve y natural al siguiente mensaje del usuario: ${message}`
+              text: `Actúa como un asistente con personalidad ${personality}. Responde de forma breve y natural:\n\n${message}`
             }
           ]
         }
