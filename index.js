@@ -8,15 +8,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('🚀 Jarvis Online - Enlace Estable v2'));
+app.get('/', (req, res) =>
+  res.send('🚀 Jarvis Online - Enlace Estable v3')
+);
 
 app.post('/chat', async (req, res) => {
   try {
     const { message, personality } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // ✅ MODELO ESTABLE Y SOPORTADO
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+    // ✅ MODELO REALMENTE SOPORTADO POR LA API REST
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const response = await axios.post(url, {
       contents: [
@@ -34,7 +36,7 @@ app.post('/chat', async (req, res) => {
       response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     res.json({
-      reply: reply || 'La IA está procesando, intenta de nuevo.'
+      reply: reply || 'La IA está pensando…'
     });
 
   } catch (error) {
