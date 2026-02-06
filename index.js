@@ -15,17 +15,20 @@ app.post('/chat', async (req, res) => {
     const { message, personality } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // RUTA CRÍTICA: Cambiamos a v1beta para compatibilidad con Flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // CAMBIO TÁCTICO: Usamos la ruta /v1/ y el modelo Flash estable
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await axios.post(url, {
-      contents: [{ parts: [{ text: `Personalidad: ${personality}. Usuario: ${message}` }] }]
+      contents: [{
+        parts: [{ text: `Actúa como un asistente con personalidad ${personality}. Usuario: ${message}` }]
+      }]
     });
 
     const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
     res.json({ reply: reply || 'La IA no devolvió texto.' });
 
   } catch (error) {
+    // Esto nos mostrará el error real en los logs de Render
     console.error('🔥 Error Real:', error.response?.data || error.message);
     res.json({ reply: 'Error de enlace táctico. Reintentando...' });
   }
