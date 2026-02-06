@@ -18,7 +18,7 @@ app.post('/chat', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     // ✅ API Y MODELO CORRECTOS (AI STUDIO)
-    const url = `https://api.generativeai.google/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const url ='https://generativeai.googleapis.com/v1beta/models/'+'gemini-1.5-flash-latest:generateContent'+`?key=${apiKey}`;
 
     const response = await axios.post(url, {
       contents: [
