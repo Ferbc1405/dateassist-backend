@@ -1,51 +1,39 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 app.get('/', (req, res) =>
-  res.send('🚀 Jarvis Online – AI Studio Ready')
+  res.send('🚀 Jarvis Online – Gemini SDK OK')
 );
 
 app.post('/chat', async (req, res) => {
   try {
     const { message, personality } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
 
-    // ✅ API Y MODELO CORRECTOS (AI STUDIO)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await axios.post(url, {
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              text: `Actúa como un asistente con personalidad ${personality}. Responde de forma breve y natural:\n\n${message}`
-            }
-          ]
-        }
-      ]
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash'
     });
 
-    const reply =
-      response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const result = await model.generateContent(
+      `Actúa como un asistente con personalidad ${personality}. 
+       Responde de forma breve y natural:\n\n${message}`
+    );
 
     res.json({
-      reply: reply || 'La IA está pensando…'
+      reply: result.response.text()
     });
 
   } catch (error) {
-    console.error(
-      '🔥 Error Detallado:',
-      error.response?.data || error.message
-    );
-
+    console.error('🔥 Error Detallado:', error);
     res.status(500).json({
       reply: 'Error de enlace táctico. Reintentando...'
     });
