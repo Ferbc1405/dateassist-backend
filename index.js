@@ -12,7 +12,7 @@ app.use(express.json());
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.get("/", (req, res) => {
-  res.send("🚀 Jarvis Online – Gemini OK");
+  res.send("🟢 Jarvis online – Gemini estable");
 });
 
 app.post("/chat", async (req, res) => {
@@ -20,12 +20,12 @@ app.post("/chat", async (req, res) => {
     const { message, personality } = req.body;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-preview"
+      model: "gemini-1.0-pro"
     });
 
     const result = await model.generateContent(
       `Actúa como un asistente con personalidad ${personality}.
-Responde de forma breve y natural:
+Responde claro y natural:
 
 ${message}`
     );
@@ -35,14 +35,14 @@ ${message}`
     });
 
   } catch (error) {
-    console.error("🔥 Error Detallado:", error);
+    console.error("🔥 Error REAL:", error);
     res.status(500).json({
-      reply: "Error de enlace táctico. Reintentando..."
+      reply: "Jarvis tuvo un fallo interno."
     });
   }
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`🟢 Servidor escuchando en puerto ${PORT}`)
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("🚀 Jarvis escuchando en", PORT);
+});
