@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import axios from "axios";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -9,51 +9,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 app.get("/", (req, res) => {
-  res.send("🟢 Jarvis Online – OpenAI Ready");
+  res.send("🟢 Jarvis Online – OpenAI SDK");
 });
 
 app.post("/chat", async (req, res) => {
   try {
     const { message, personality } = req.body;
 
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `Eres un asistente con personalidad ${personality}. Responde de forma breve, natural y humana.`
-          },
-          {
-            role: "user",
-            content: message
-          }
-        ],
-        temperature: 0.7
-      },
-      {
-        headers: {
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    const response = await openai.responses.create({
+      model: "gpt-5-nano",
+      input: `Eres un asistente con personalidad ${personality}. Responde de forma breve y natural:\n\n${message}`
+    });
 
-    const reply =
-      response.data.choices[0].message.content;
-
-    res.json({ reply });
+    res.json({
+      reply: response.output_text
+    });
 
   } catch (error) {
-    console.error(
-      "🔥 Error REAL:",
-      error.response?.data || error.message
-    );
-
+    console.error("🔥 Error REAL:", error);
     res.status(500).json({
-      reply: "Jarvis tuvo un problema interno."
+      reply: "Error interno de Jarvis."
     });
   }
 });
