@@ -9,29 +9,40 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const client = new OpenAI({
+// ✅ OpenAI client
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// ✅ Health check
+app.get("/", (req, res) => {
+  res.send("🚀 Jarvis Online – OpenAI Connected");
+});
+
+// ✅ Chat endpoint
 app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, personality } = req.body;
 
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: message,
+    const response = await openai.responses.create({
+      model: "gpt-5-nano",
+      input: `Actúa como un asistente con personalidad ${personality}. Responde de forma natural y breve.\n\nUsuario: ${message}`,
     });
 
     res.json({
       reply: response.output_text,
     });
   } catch (error) {
-    console.error("🔥 OpenAI error:", error);
-    res.status(500).json({ error: "AI error" });
+    console.error("🔥 Error OpenAI:", error.message);
+
+    res.status(500).json({
+      reply: "Error de enlace táctico. Reintentando...",
+    });
   }
 });
 
+// ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🟢 Servidor activo en http://localhost:${PORT}`);
 });
